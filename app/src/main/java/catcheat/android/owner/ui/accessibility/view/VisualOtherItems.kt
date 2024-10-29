@@ -5,5 +5,5 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun VisualOtherItems() {
-    Text(text = "시각장애인 지원 기타")
+
 }

@@ -19,6 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import catcheat.android.owner.ui.common.MainScreens
@@ -29,13 +31,14 @@ fun MainNav(
     currentScreen: MainScreens,
     onTabSelected: (MainScreens) -> Unit
 ) {
-    Column {
-        Spacer(modifier = Modifier.height(50.dp))
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .background(Color.White),
+        verticalArrangement = Arrangement.Bottom
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(90.dp)
-                .background(Color.White),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
@@ -51,12 +54,19 @@ fun MainNav(
                     text = when (screen.displayName) {
                         "Home" -> "캐칫 홈"
                         "Ranking" -> "캐칫 랭킹"
-                        else -> screen.displayName
+                        else -> ""
                     },
                     style = Bold30TextStyle,
                     color = color,
                     modifier = Modifier
                         .padding(start = 30.dp)
+                        .semantics {
+                            contentDescription = when (screen.displayName) {
+                                "Home" -> "캐칫 홈, 홈 화면으로 가기"
+                                "Ranking" -> "캐칫 랭킹, 랭킹 화면으로 가기"
+                                else -> ""
+                            }
+                        }
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
@@ -66,6 +76,7 @@ fun MainNav(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 

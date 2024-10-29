@@ -1,11 +1,14 @@
 package catcheat.android.owner.ui.ranking.view
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -17,14 +20,11 @@ fun EntireRanking(navController: NavHostController, viewModel: EntireRankingView
     val rankingList by viewModel.rankingList.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    Spacer(modifier = Modifier.height(15.dp))
-
-    // 에러 메시지가 있으면 UI에서 표시할 수 있음
-    errorMessage?.let {
-        // 에러 메시지 출력하는 컴포넌트 (예: Text)
-    }
-
-    LazyColumn {
+    LazyColumn (
+        modifier = Modifier
+            .padding(start = 30.dp, end = 30.dp, bottom = 30.dp)
+            .semantics { contentDescription = "종합 랭킹입니다." }
+    ) {
         items(rankingList) { ranking ->
             RankingList(
                 rank = ranking.rank,

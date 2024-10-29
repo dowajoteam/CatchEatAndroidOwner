@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +19,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import catcheat.android.owner.ui.common.RankingScreens
@@ -37,20 +41,21 @@ fun RankingScreen(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // 상단 설명 텍스트
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = "접근성 점수를 기반으로 한 사장님들의 순위에요." },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.width(40.dp))
-            Text(text = "접근성 점수", style = Medium15TextStyle, color = CatchEat)
-            Text(text = "를 기반으로 한 사장님들의 순위이에요.", style = Medium15TextStyle, color = Color.Black)
+            Text(text = "접근성 점수", style = Medium15TextStyle, color = CatchEat, modifier = Modifier.clearAndSetSemantics {})
+            Text(text = "를 기반으로 한 사장님들의 순위이에요.", style = Medium15TextStyle, color = Color.Black, modifier = Modifier.clearAndSetSemantics {})
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
         // RankingNav - 카테고리별 네비게이션
         RankingNav(currentRanking = currentRanking, onTabSelected = {

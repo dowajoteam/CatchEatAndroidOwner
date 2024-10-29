@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,10 +46,12 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 @Composable
 fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = hiltViewModel()) {
-    val storeInfo by viewModel.storeInfo.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-
     val context = LocalContext.current
+
+    val storeInfo by viewModel.storeInfo.observeAsState(null)
+    val isRequestInProgress by viewModel.isRequestInProgress.observeAsState(false)
+    val isImageUpdateInProgress by viewModel.isImageUpdateInProgress.observeAsState(false)
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
@@ -54,17 +59,25 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = hilt
                 val imageStream = context.contentResolver.openInputStream(uri)
                 val requestBody = imageStream?.let { stream ->
                     MultipartBody.Part.createFormData(
-                        "image", "image.jpg", stream.readBytes().toRequestBody("image/*".toMediaTypeOrNull())
+                        "image",
+                        "image.jpg",
+                        stream.readBytes().toRequestBody("image/*".toMediaTypeOrNull())
                     )
                 }
-                requestBody?.let { viewModel.updateStoreImage(it) }
+                requestBody?.let { viewModel.refreshImage(it) }
             }
         }
     )
 
-    LaunchedEffect(storeInfo) {
-        if (storeInfo == null) {
-            viewModel.fetchStoreInfo()
+//    // 첫 화면 로드시 데이터 로드
+//    LaunchedEffect(Unit) {
+//        if (storeInfo == null && !isRequestInProgress) {
+//            viewModel.refresh()
+//        }
+//    }
+    LaunchedEffect(key1 = Unit) {
+        if (storeInfo == null && !isRequestInProgress) {
+            viewModel.refresh()
         }
     }
 
@@ -72,7 +85,8 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = hilt
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Box(
             modifier = Modifier
@@ -97,69 +111,73 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = hilt
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "접근성 카테고리별 기본 항목 충족 시 \n" +
-                            "캐칫 이용자에게 가게홍보가 진행됩니다.\n" +
-                            "만족하는 카테고리를 늘리면 상위에 노출될 수 있어요",
+                    text = "접근성 카테고리별 기본 항목 충족 시\n캐칫 이용자에게 가게홍보가 진행됩니다.\n만족하는 카테고리를 늘리면 상위에 노출될 수 있어요.",
                     style = Medium15TextStyle,
                     color = Color.Black
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+//        LazyColumn(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(top = 30.dp, bottom = 70.dp, start = 30.dp, end = 30.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            item {
+                storeInfo?.let { info ->
+                    RestaurantInformation1(
+                        name = info.storeName,
+                        address = info.address,
+                        overallRank = info.overallRank,
+                        totalRankingScore = info.totalRankingScore,
+                        imageUrl = info.image,
+                        onImageClick = {
+                            if (!isImageUpdateInProgress) { // 이미지 업데이트 중이 아닐 때만 실행
+                                launcher.launch("image/*")
+                            }
+                        }
+                    )
 
-        storeInfo?.let { info ->
-            RestaurantInformation1(
-                name = info.storeName,
-                address = info.address,
-                overallRank = info.overallRank,
-                totalRankingScore = info.totalRankingScore,
-                imageUrl = info.image,
-                onImageClick = {
-                    launcher.launch("image/*")
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = "우리가게 접근성 점수 올리러 가기",
+                        style = Bold20TextStyle,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    LazyRow {
+                        item {
+                            CustomerInfoBox(info.storeName, 9000)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(30.dp))
+
+                    LazyColumn {
+                        item {
+                            AccessibilityUploadList(0, info.physicalAccessibility, info.physicalScore) {
+                                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/0")
+                            }
+                        }
+                        item {
+                            AccessibilityUploadList(1, info.serviceAccessibility, info.serviceScore) {
+                                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/1")
+                            }
+                        }
+                        item {
+                            AccessibilityUploadList(2, info.visualImpairmentAccessibility, info.visualScore) {
+                                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/2")
+                            }
+                        }
+                    }
                 }
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            Text(
-                text = "우리가게 접근성 점수 올리러 가기",
-                style = Bold20TextStyle,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            CustomerInfoBox(info.storeName, 9000)
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            AccessibilityUploadList(0, info.physicalAccessibility, info.physicalScore) {
-                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/0")
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            AccessibilityUploadList(1, info.serviceAccessibility, info.serviceScore) {
-                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/1")
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            AccessibilityUploadList(2, info.visualImpairmentAccessibility, info.visualScore) {
-                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/2")
-            }
-        }
-
-        errorMessage?.let { message ->
-            Text(
-                text = "Error: $message",
-                color = Color.Red,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        }
+//            }
+//        }
     }
 }
-
-

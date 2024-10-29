@@ -4,9 +4,9 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -60,7 +60,9 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
@@ -96,7 +98,7 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                     Spacer(modifier = Modifier.height(20.dp))
 
                     HorizontalDivider(
-                        modifier = Modifier.width(300.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         thickness = 2.dp,
                         color = Gray2
                     )
@@ -217,7 +219,7 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
 
                     // 제출 버튼
                     val context = LocalContext.current
-                    CustomButton("제출하기") {
+                    CustomButton("제출하기", onClick = {
                         viewModel.uploadPhysicalInfo(
                             doorWidthOver90cmDescription = doorWidthOver90cmDescription,
                             doorWidthOver90cmImageFile = doorWidthOver90cmImage?.toFile(context),
@@ -232,8 +234,7 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                             disabledToiletDescription = disabledToiletDescription,
                             disabledToiletImageFile = disabledToiletImage?.toFile(context)
                         )
-                    }
-
+                    })
 
                     uploadSuccess?.let { success ->
                         if (success) {
@@ -242,9 +243,6 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                             Text(text = "업로드 실패!", color = Color.Red)
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(50.dp))
-
                 }
             } ?: run {
                 if (errorMessage != null) {

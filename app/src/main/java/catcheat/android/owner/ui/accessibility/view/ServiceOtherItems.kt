@@ -5,5 +5,5 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun ServiceOtherItems() {
-    Text(text = "서비스 접근성 기타")
+
 }

@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import catcheat.android.owner.R
@@ -73,6 +75,15 @@ fun RankingNav(
                     color = color,
                     modifier = Modifier
                         .padding(start = 20.dp, end = 20.dp)
+                        .semantics {
+                            contentDescription = when (screen.name) {
+                                "total" -> "종합 랭킹"
+                                "physical" -> "물리적 접근성 랭킹"
+                                "service" -> "서비스 접근성 랭킹"
+                                "visual" -> "시각장애인 지원 접근성 랭킹"
+                                else -> ""
+                            }
+                        }
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null

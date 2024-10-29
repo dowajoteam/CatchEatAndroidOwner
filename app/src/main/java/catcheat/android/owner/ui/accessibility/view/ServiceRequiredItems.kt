@@ -5,7 +5,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,8 +50,9 @@ fun ServiceRequiredItems(viewModel: ServiceRequiredItemsViewModel = hiltViewMode
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
     ) {
         item {
             serviceRequiredItems?.let { items ->
@@ -71,7 +74,7 @@ fun ServiceRequiredItems(viewModel: ServiceRequiredItemsViewModel = hiltViewMode
             Spacer(modifier = Modifier.height(20.dp))
 
             HorizontalDivider(
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier.fillMaxWidth(),
                 thickness = 2.dp,
                 color = Gray2
             )
@@ -106,12 +109,12 @@ fun ServiceRequiredItems(viewModel: ServiceRequiredItemsViewModel = hiltViewMode
             Spacer(modifier = Modifier.height(30.dp))
 
             // 제출 버튼
-            CustomButton("제출하기") {
+            CustomButton(text = "제출하기", onClick = {
                 viewModel.uploadServiceInfo(
                     staffCallOrderAvailableDescription,
                     staffCallOrderAvailableImageUri?.toFile(context)
                 )
-            }
+            })
 
             // 업로드 성공/실패 메시지
             uploadSuccess?.let { success ->
@@ -121,8 +124,6 @@ fun ServiceRequiredItems(viewModel: ServiceRequiredItemsViewModel = hiltViewMode
                     Text(text = "업로드 실패!", color = Color.Red)
                 }
             }
-
-            Spacer(modifier = Modifier.height(50.dp))
         }
     }
 }

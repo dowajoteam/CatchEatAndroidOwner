@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,11 +29,10 @@ fun AccessibilityUploadScreen(navController: NavHostController, type: Int) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(Color.White)
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(50.dp))
-
         val title = when (type) {
             0 -> "물리적 접근성"
             1 -> "서비스 접근성"
@@ -47,12 +48,10 @@ fun AccessibilityUploadScreen(navController: NavHostController, type: Int) {
             2 -> AccessibilityScreens.VisualRequired
             else -> AccessibilityScreens.PhysicalRequired
         }) }
-
         // 탭 선택 시 currentItem 업데이트
         AccessibilityUploadNav(type, currentItem) { selectedScreen ->
             currentItem = selectedScreen // 탭 선택 시 상태 업데이트
         }
-
         // currentItem에 따라 다른 화면 표시
         when (currentItem) {
             AccessibilityScreens.PhysicalRequired -> PhysicalRequiredItems()

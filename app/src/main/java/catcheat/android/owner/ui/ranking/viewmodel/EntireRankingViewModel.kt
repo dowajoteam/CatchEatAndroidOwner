@@ -15,11 +15,9 @@ class EntireRankingViewModel @Inject constructor(
     private val repository: EntireRankingRepository
 ) : ViewModel() {
 
-    // StateFlow를 통해 UI에서 데이터 상태를 관찰할 수 있음
     private val _rankingList = MutableStateFlow<List<EntireRankingResponse>>(emptyList())
     val rankingList: StateFlow<List<EntireRankingResponse>> = _rankingList
 
-    // 오류 상태를 저장하기 위한 변수
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 

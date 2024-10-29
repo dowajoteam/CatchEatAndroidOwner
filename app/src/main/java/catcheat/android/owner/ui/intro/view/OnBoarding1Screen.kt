@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
@@ -17,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import catcheat.android.owner.R
@@ -30,35 +30,37 @@ fun OnBoarding1Screen() {
             .fillMaxSize()
             .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(modifier = Modifier.height(350.dp))
         Column(horizontalAlignment = Alignment.Start) {
+            Spacer(modifier = Modifier.height(300.dp))
             Row {
                 Spacer(modifier = Modifier.width(15.dp))
                 Image(
                     painter = painterResource(id = R.drawable.pointcircle),
-                    contentDescription = "onboarding",
+                    contentDescription = null,
                     modifier = Modifier.size(10.dp)
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
             Row {
-                Text(text = "모두에게 닿기위한", color = Color.Black, style = ExtraBold25TextStyle)
-                Text(text = " 가게의 시작", color = Color.Black, style = Regular25TextStyle)
+                Text(text = "모두에게 닿기위한", color = Color.Black, style = ExtraBold25TextStyle, modifier = Modifier.clearAndSetSemantics {})
+                Text(text = " 가게의 시작", color = Color.Black, style = Regular25TextStyle, modifier = Modifier.clearAndSetSemantics {})
             }
         }
-        Spacer(modifier = Modifier.height(300.dp))
-        Image(
-            painter = painterResource(id = R.drawable.onboarding1_img),
-            contentDescription = "onboarding",
-            modifier = Modifier.size(100.dp)
-        )
+        Column {
+            Image(
+                painter = painterResource(id = R.drawable.onboarding1_img),
+                contentDescription = null,
+                modifier = Modifier.size(100.dp)
+            )
+            Spacer(modifier = Modifier.height(50.dp))
+        }
     }
 }
 
-@Preview()
+@Preview
 @Composable
-fun OnBording1ScreenPreview() {
+fun OnBoarding1ScreenPreview() {
     OnBoarding1Screen()
 }

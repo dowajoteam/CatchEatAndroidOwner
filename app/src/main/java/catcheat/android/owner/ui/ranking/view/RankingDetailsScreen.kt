@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -54,39 +58,35 @@ fun RankingDetailsScreen(navController: NavHostController, storeId: Int, viewMod
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(Color.White)
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (rankingDetails != null) {
             val details = rankingDetails!!
 
-            Spacer(modifier = Modifier.height(50.dp))
-
             Leave(navController = navController, details.storeName, false)
 
-            RestaurantInformation2(details.image, details.storeName, details.address)
-
             LazyColumn(
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier.padding(start = 15.dp, end = 15.dp, bottom = 70.dp),
                 horizontalAlignment = Alignment.Start
             ) {
                 item {
-                    var isExpanded by remember { mutableStateOf(false) }
-
+                    RestaurantInformation2(details.image, details.storeName, details.address)
                     Spacer(modifier = Modifier.height(30.dp))
+                }
+                item {
+                    var isExpanded by remember { mutableStateOf(false) }
 
                     CheckSize1(
                         "물리적 접근성",
                         details.physicalAccessibility.allCriteriaMet,
                         details.physicalScore
                     )
-
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Box(
                         modifier = Modifier
-                            .width(300.dp)
-                            .fillMaxHeight()
+                            .fillMaxSize()
                             .background(
                                 color = LightCatchEat,
                                 shape = RoundedCornerShape(10.dp)
@@ -127,29 +127,31 @@ fun RankingDetailsScreen(navController: NavHostController, storeId: Int, viewMod
                             Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
-
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Row(
-                        modifier = Modifier.clickable { isExpanded = !isExpanded },
+                        modifier = Modifier
+                            .clickable { isExpanded = !isExpanded }
+                            .semantics {
+                                contentDescription = if (isExpanded) {
+                                    "“${details.storeName}”에서 제공하는 기타 물리적 접근성 토글 닫기"
+                                } else {
+                                    "“${details.storeName}”에서 제공하는 기타 물리적 접근성 토글 열기"
+                                }
+                            },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
                             painter = painterResource(if (isExpanded) R.drawable.toggle2 else R.drawable.toggle1),
-                            contentDescription = if (isExpanded) {
-                                "“${details.storeName}”에서 제공하는 기타 물리적 접근성 토글 닫기"
-                            } else {
-                                "“${details.storeName}”에서 제공하는 기타 물리적 접근성 토글 열기"
-                            },
+                            contentDescription = null,
                             modifier = Modifier.size(15.dp)
                         )
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = "“${details.storeName}”에서 제공하는 기타 물리적 접근성",
-                            style = Medium15TextStyle
+                            style = Medium15TextStyle,
+                            modifier = Modifier.clearAndSetSemantics {}
                         )
                     }
-
                     // 클릭 시 표시되는 내용
                     AnimatedVisibility(visible = isExpanded) {
                         Row {
@@ -171,19 +173,15 @@ fun RankingDetailsScreen(navController: NavHostController, storeId: Int, viewMod
                     var isExpanded by remember { mutableStateOf(false) }
 
                     Spacer(modifier = Modifier.height(30.dp))
-
                     CheckSize1(
                         "서비스 접근성",
                         details.serviceAccessibility.allCriteriaMet,
                         details.serviceScore
                     )
-
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Box(
                         modifier = Modifier
-                            .width(300.dp)
-                            .fillMaxHeight()
+                            .fillMaxSize()
                             .background(
                                 color = LightCatchEat,
                                 shape = RoundedCornerShape(10.dp)
@@ -202,29 +200,31 @@ fun RankingDetailsScreen(navController: NavHostController, storeId: Int, viewMod
                             Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
-
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Row(
-                        modifier = Modifier.clickable { isExpanded = !isExpanded },
+                        modifier = Modifier
+                            .clickable { isExpanded = !isExpanded }
+                            .semantics {
+                                contentDescription = if (isExpanded) {
+                                    "“${details.storeName}”에서 제공하는 기타 서비스 접근성 토글 닫기"
+                                } else {
+                                    "“${details.storeName}”에서 제공하는 기타 서비스 접근성 토글 열기"
+                                }
+                            },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
                             painter = painterResource(if (isExpanded) R.drawable.toggle2 else R.drawable.toggle1),
-                            contentDescription = if (isExpanded) {
-                                "“${details.storeName}”에서 제공하는 기타 서비스 접근성 토글 닫기"
-                            } else {
-                                "“${details.storeName}”에서 제공하는 기타 서비스 접근성 토글 열기"
-                            },
+                            contentDescription = null,
                             modifier = Modifier.size(15.dp)
                         )
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = "“${details.storeName}”에서 제공하는 기타 서비스 접근성",
-                            style = Medium15TextStyle
+                            style = Medium15TextStyle,
+                            modifier = Modifier.clearAndSetSemantics {}
                         )
                     }
-
                     // 클릭 시 표시되는 내용
                     AnimatedVisibility(visible = isExpanded) {
                         Row {
@@ -246,19 +246,15 @@ fun RankingDetailsScreen(navController: NavHostController, storeId: Int, viewMod
                     var isExpanded by remember { mutableStateOf(false) }
 
                     Spacer(modifier = Modifier.height(30.dp))
-
                     CheckSize1(
                         "시각장애인 지원",
                         details.visualImpairmentAccessibility.allCriteriaMet,
                         details.visualScore
                     )
-
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Box(
                         modifier = Modifier
-                            .width(300.dp)
-                            .fillMaxHeight()
+                            .fillMaxSize()
                             .background(
                                 color = LightCatchEat,
                                 shape = RoundedCornerShape(10.dp)
@@ -289,29 +285,31 @@ fun RankingDetailsScreen(navController: NavHostController, storeId: Int, viewMod
                             Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
-
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Row(
-                        modifier = Modifier.clickable { isExpanded = !isExpanded },
+                        modifier = Modifier
+                            .clickable { isExpanded = !isExpanded }
+                            .semantics {
+                                contentDescription = if (isExpanded) {
+                                    "“${details.storeName}”에서 제공하는 기타 시각장애인 지원 접근성 토글 닫기"
+                                } else {
+                                    "“${details.storeName}”에서 제공하는 기타 시각장애인 지원 접근성 토글 열기"
+                                }
+                            },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
                             painter = painterResource(if (isExpanded) R.drawable.toggle2 else R.drawable.toggle1),
-                            contentDescription = if (isExpanded) {
-                                "“${details.storeName}”에서 제공하는 기타 서비스 접근성 토글 닫기"
-                            } else {
-                                "“${details.storeName}”에서 제공하는 기타 서비스 접근성 토글 열기"
-                            },
+                            contentDescription = null,
                             modifier = Modifier.size(15.dp)
                         )
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "“${details.storeName}”에서 제공하는 기타 서비스 접근성",
-                            style = Medium15TextStyle
+                            text = "“${details.storeName}”에서 제공하는 기타 시각장애인 지원 접근성",
+                            style = Medium15TextStyle,
+                            modifier = Modifier.clearAndSetSemantics {}
                         )
                     }
-
                     // 클릭 시 표시되는 내용
                     AnimatedVisibility(visible = isExpanded) {
                         Row {

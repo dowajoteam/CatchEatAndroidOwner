@@ -20,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import catcheat.android.owner.ui.common.AccessibilityScreens
@@ -43,7 +45,7 @@ fun AccessibilityUploadNav(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp)
+                .height(50.dp)
                 .background(Color.White),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -69,6 +71,12 @@ fun AccessibilityUploadNav(
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val Accessibility = when (type) {
+                        0 -> "물리적 접근성"
+                        1 -> "서비스 접근성"
+                        2 -> "시각장애인 지원 접근성"
+                        else -> ""
+                    }
                     Text(
                         text = when (screen.name) {
                             "PhysicalRequired", "ServiceRequired", "VisualRequired" -> "필수 만족 항목"
@@ -76,7 +84,15 @@ fun AccessibilityUploadNav(
                             else -> screen.name
                         },
                         style = Bold15TextStyle,
-                        color = color
+                        color = color,
+                        modifier = Modifier
+                            .semantics {
+                                contentDescription = when (screen.name) {
+                                    "PhysicalRequired", "ServiceRequired", "VisualRequired" -> "$Accessibility 필수 만족 항목"
+                                    "PhysicalOther", "ServiceOther", "VisualOther" -> "$Accessibility 기타"
+                                    else -> screen.name
+                                }
+                            }
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     HorizontalDivider(

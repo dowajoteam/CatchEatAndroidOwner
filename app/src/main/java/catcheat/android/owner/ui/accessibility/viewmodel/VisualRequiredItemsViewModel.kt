@@ -32,6 +32,10 @@ class VisualRequiredItemsViewModel @Inject constructor(
     private val _uploadSuccess = MutableStateFlow<Boolean?>(null)
     val uploadSuccess: StateFlow<Boolean?> = _uploadSuccess
 
+    init {
+        fetchVisualRequiredItems()
+    }
+
     // 서비스 필수 항목 불러오는 함수
     fun fetchVisualRequiredItems() {
         viewModelScope.launch {

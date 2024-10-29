@@ -32,6 +32,10 @@ class ServiceRequiredItemsViewModel @Inject constructor(
     private val _uploadSuccess = MutableStateFlow<Boolean?>(null)
     val uploadSuccess: StateFlow<Boolean?> = _uploadSuccess
 
+    init {
+        fetchServiceRequiredItems()
+    }
+
     fun fetchServiceRequiredItems() {
         viewModelScope.launch {
             try {

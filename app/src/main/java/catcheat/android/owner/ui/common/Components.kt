@@ -1,9 +1,11 @@
 package catcheat.android.owner.ui.common
 
-
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.webkit.JavascriptInterface
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,8 +15,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,19 +36,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import catcheat.android.owner.R
-import catcheat.android.owner.ui.ranking.view.RankingDetailsScreen
 import catcheat.android.owner.ui.theme.Bold12TextStyle
 import catcheat.android.owner.ui.theme.Bold15TextStyle
 import catcheat.android.owner.ui.theme.Bold20TextStyle
@@ -55,7 +68,7 @@ import catcheat.android.owner.ui.theme.Gray2
 import catcheat.android.owner.ui.theme.Medium15TextStyle
 import catcheat.android.owner.ui.theme.Medium20TextStyle
 import catcheat.android.owner.ui.theme.Regular15TextStyle
-import coil3.compose.AsyncImagePainter.State.Empty.painter
+import catcheat.android.owner.ui.theme.Regular20TextStyle
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
@@ -65,63 +78,206 @@ fun CustomTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    isPhoneNumber: Boolean = false
 ) {
+    val isFocused = remember { mutableStateOf(false) }
+    val placeholderPosition by animateFloatAsState(if (value.isNotEmpty() || isFocused.value) -20f else 0f)
+    val placeholderSize by animateFloatAsState(if (value.isNotEmpty() || isFocused.value) 15f else 20f)
+    val placeholderColor = if (isFocused.value) CatchEat else Color.Gray
+    val lineColor = if (isFocused.value) CatchEat else Color.Gray
+
     Box(
         modifier = Modifier
-            .width(300.dp)
-            .height(50.dp)
-            .background(Color.LightGray, RoundedCornerShape(8.dp)),
-        contentAlignment = Alignment.Center
+            .width(350.dp)
+            .height(70.dp)
     ) {
         BasicTextField(
             value = value,
-            onValueChange = onValueChange,
+            onValueChange = { newValue ->
+                if (isPhoneNumber) {
+                    // 숫자만 남기고 포맷팅하여 업데이트
+                    val clean = newValue.replace(Regex("[^\\d]"), "")
+                    onValueChange(clean) // 숫자만 유지
+                } else {
+                    onValueChange(newValue)
+                }
+            },
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(top = 15.dp)
+                .onFocusChanged {
+                    isFocused.value = it.isFocused
+                }
+                .align(Alignment.CenterStart),
             singleLine = true,
             textStyle = Regular15TextStyle.copy(color = Color.Black),
-            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
+            visualTransformation = if (isPassword) {
+                PasswordVisualTransformation()
+            } else if (isPhoneNumber) {
+                PhoneNumberVisualTransformation()
+            } else {
+                VisualTransformation.None
+            }
         )
 
-        if (value.isEmpty()) {
+        Text(
+            text = placeholder,
+            color = placeholderColor,
+            style = Regular15TextStyle.copy(fontSize = placeholderSize.sp),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .offset(y = placeholderPosition.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(2.dp)
+                .background(lineColor)
+                .align(Alignment.BottomCenter)
+        )
+    }
+}
+// 휴대폰 번호 포맷을 위한 VisualTransformation
+class PhoneNumberVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val clean = text.text.replace(Regex("[^\\d]"), "")
+        val formatted = StringBuilder()
+
+        // 포맷팅된 전화번호 생성
+        for (i in clean.indices) {
+            if (i == 3 || i == 7) {
+                formatted.append('-')
+            }
+            formatted.append(clean[i])
+        }
+
+        // 원본 텍스트의 길이와 포맷된 텍스트의 길이
+        val originalLength = text.text.length
+        val formattedLength = formatted.length
+
+        // 사용자 정의 OffsetMapping
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                if (offset > originalLength) {
+                    return formattedLength
+                }
+
+                var transformedOffset = 0
+                for (i in 0 until offset) {
+                    transformedOffset++
+                    if (i == 3 || i == 7) {
+                        transformedOffset++ // 하이픈 추가
+                    }
+                }
+                return transformedOffset
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                var originalOffset = 0
+                var transformedCount = 0
+
+                for (i in 0 until offset) {
+                    originalOffset++
+                    if (originalOffset <= clean.length && (originalOffset == 4 || originalOffset == 8)) {
+                        transformedCount++ // 하이픈 무시
+                    }
+                    transformedCount++
+                }
+
+                return originalOffset.coerceAtMost(clean.length) // 범위를 벗어나지 않도록 조정
+            }
+        }
+
+        return TransformedText(AnnotatedString(formatted.toString()), offsetMapping)
+    }
+}
+
+@Composable
+fun AddressTextField(
+    address: String,
+    onValueChange: (String) -> Unit,
+) {
+    val showWebView = remember { mutableStateOf(false) }
+
+    Column {
+        Box(
+            modifier = Modifier
+                .width(350.dp)
+                .height(70.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    showWebView.value = true // 클릭 시 WebView를 보여줌
+                }
+        ) {
             Text(
-                text = placeholder,
-                color = Color.Gray,
-                style = Regular15TextStyle
+                text = if (address.isNotEmpty()) address else "주소",
+                color = if (address.isNotEmpty()) Color.Black else Color.Gray,
+                style = if (address.isNotEmpty()) Regular15TextStyle else Regular20TextStyle,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterStart)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(Color.Gray)
+                    .align(Alignment.BottomCenter)
             )
         }
+
+        // WebView 표시 여부에 따라 WebView를 렌더링
+        if (showWebView.value) {
+            WebViewAddress(onAddressSelected = { selectedAddress ->
+                onValueChange(selectedAddress)
+                showWebView.value = false // WebView 닫기
+            })
+        }
+    }
+}
+
+@Composable
+fun WebViewAddress(
+    onAddressSelected: (String) -> Unit
+) {
+    Box(modifier = Modifier
+        .width(350.dp)
+        .fillMaxHeight()) {
+        AndroidView(factory = { context ->
+            WebView(context).apply {
+                settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                settings.loadWithOverviewMode = true // 화면 크기에 맞게 조정
+                settings.useWideViewPort = true // 콘텐츠가 화면 가로 크기에 맞게 로드됨
+                webViewClient = WebViewClient()
+                webChromeClient = WebChromeClient()
+
+                addJavascriptInterface(object {
+                    @JavascriptInterface
+                    fun processDATA(address: String) {
+                        onAddressSelected(address) // 주소 선택 시 호출
+                    }
+                }, "Android")
+                loadUrl("https://catcheat.s3.ap-northeast-2.amazonaws.com/map/index.html") // HTML 파일 URL
+            }
+        }, modifier = Modifier.fillMaxSize())
     }
 }
 
 @Composable
 fun CustomButton(
     text: String,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .width(330.dp)
-            .height(50.dp)
-            .background(color = CatchEat, shape = RoundedCornerShape(10.dp))
-            .clip(RoundedCornerShape(20.dp))
-            .clickable {
-                onClick()
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = text, style = Medium20TextStyle, color = Color.White)
-    }
-}
-@Composable
-fun CustomButton2(
-    text: String,
     onClick: () -> Unit,
-    enabled: Boolean = true // enabled 매개변수 추가, 기본값은 true로 설정
+    enabled: Boolean = true
 ) {
     Box(
         modifier = Modifier
-            .width(330.dp)
+            .width(350.dp)
             .height(50.dp)
             .background(
                 color = if (enabled) CatchEat else Color.Gray, // enabled 상태에 따라 색상 변경
@@ -141,46 +297,45 @@ fun CustomButton2(
 
 @Composable
 fun TOSCheck(text1: String, text2: String, status: Boolean, onStatusChange: (Boolean) -> Unit) {
+    val statusDescription = if (status) "동의됨" else "동의되지 않음"
     Row(
         modifier = Modifier
-            .width(330.dp)
+            .fillMaxWidth()
             .height(20.dp)
-            .clickable {
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
                 onStatusChange(!status)
             },
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Image(
-            painter = painterResource(
-                id = if (status) R.drawable.lightcheck_o else R.drawable.lightcheck_x
-            ),
-            contentDescription = "$text2 동의하기 버튼",
-            modifier = Modifier.size(15.dp)
-        )
-
-        Spacer(modifier = Modifier.width(20.dp))
-
         Row(
-            modifier = Modifier.width(200.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.semantics { contentDescription = "$text1 $text2 동의하기 버튼 $statusDescription" }
         ) {
-            Text(text = "[$text1]", style = Bold15TextStyle, color = Color.Black)
-            Spacer(modifier = Modifier.width(5.dp))
-            Text(text = "$text2", style = Regular15TextStyle, color = Color.Black)
+            Image(
+                painter = painterResource(
+                    id = if (status) R.drawable.lightcheck_o else R.drawable.lightcheck_x
+                ),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "[$text1]", style = Bold15TextStyle, color = Color.Black, modifier = Modifier.clearAndSetSemantics {})
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = "$text2", style = Regular15TextStyle, color = Color.Black, modifier = Modifier.clearAndSetSemantics {})
+            }
         }
-
-        Spacer(modifier = Modifier.width(20.dp))
-
         Image(
             painter = painterResource(id = R.drawable.lightenter),
-            contentDescription = "$text2 동의하기 버튼",
+            contentDescription = "$text2 상세 페이지 들어가기",
             modifier = Modifier.size(20.dp)
         )
-
-        Spacer(modifier = Modifier.width(10.dp))
     }
 }
 
@@ -196,7 +351,6 @@ fun RestaurantInformation1(
     val rankText = remember(overallRank, totalRankingScore) {
         if (overallRank != "Not ranked") "종합 랭킹 $overallRank" + "위 ($totalRankingScore" + "점)" else ""
     }
-
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -212,7 +366,7 @@ fun RestaurantInformation1(
         )
         Image(
             painter = painter,
-            contentDescription = "우리가게 대표 이미지",
+            contentDescription = "우리가게 대표 이미지 변경",
             modifier = Modifier
                 .width(100.dp)
                 .height(100.dp)
@@ -254,7 +408,7 @@ fun RestaurantInformation2(imageUrl: String?, name: String, address: String) {
         )
         Image(
             painter = painter,
-            contentDescription = "우리가게 대표 이미지",
+            contentDescription = null,
             modifier = Modifier
                 .width(100.dp)
                 .height(100.dp)
@@ -262,14 +416,14 @@ fun RestaurantInformation2(imageUrl: String?, name: String, address: String) {
                     color = Color.White,
                     shape = RoundedCornerShape(10.dp)
                 )
+                .clip(RoundedCornerShape(10.dp)),
+            contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.width(20.dp))
         Column(horizontalAlignment = Alignment.Start) {
             Text(text = name, style = Bold25TextStyle)
             Spacer(modifier = Modifier.height(10.dp))
             Text(text = address, style = Regular15TextStyle, color = Color.Gray)
-//            Spacer(modifier = Modifier.height(5.dp))
-//            Text(text = "종합 랭킹 $ranking" + "위 ($score"+ "점)", style = Medium15TextStyle, color = CatchEat)
         }
     }
 }
@@ -309,12 +463,11 @@ fun AccessibilityUploadList(type: Int, status: Boolean, score: Int, onClick: () 
     Box(
         modifier = Modifier
             .wrapContentWidth()
-            .background(Color.White, RoundedCornerShape(20.dp))
-            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick // onClick이 NavController를 통해 동작하도록 변경
+                onClick = onClick
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -325,12 +478,12 @@ fun AccessibilityUploadList(type: Int, status: Boolean, score: Int, onClick: () 
             imageResource?.let {
                 Image(
                     painter = painterResource(id = it),
-                    contentDescription = "$typeText 이미지",
-                    modifier = Modifier.size(50.dp)
+                    contentDescription = null,
+                    modifier = Modifier.size(70.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(30.dp))
-            Column(modifier = Modifier.width(150.dp)) {
+            Spacer(modifier = Modifier.width(20.dp))
+            Column(modifier = Modifier.width(170.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = typeText,
@@ -346,7 +499,6 @@ fun AccessibilityUploadList(type: Int, status: Boolean, score: Int, onClick: () 
                         )
                     }
                 }
-
                 if (rankingStatus.isNotEmpty()) {
                     Text(
                         text = rankingStatus,
@@ -355,11 +507,11 @@ fun AccessibilityUploadList(type: Int, status: Boolean, score: Int, onClick: () 
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(30.dp))
+            Spacer(modifier = Modifier.width(20.dp))
             Image(
                 painter = painterResource(id = R.drawable.enter),
                 contentDescription = "$typeText 페이지 들어가기",
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(30.dp)
             )
         }
     }
@@ -372,45 +524,44 @@ fun AccessibilityUpload(
     status: Boolean,
     image: Painter,
     imageUrl: String?,
-    description: String,
+    description: String?,
     selectedImageUri: Uri?,
     onImageClick: () -> Unit,
     onDescriptionChange: (String) -> Unit
 ) {
     Column(
-        modifier = Modifier.width(300.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp, bottom = 20.dp),
         horizontalAlignment = Alignment.Start
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
-
         CheckSize3Light(title, status)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
         Row(horizontalArrangement = Arrangement.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     painter = image,
-                    contentDescription = "$title 모범 사례",
+                    contentDescription = null,
                     modifier = Modifier
-                        .width(145.dp)
+                        .width(150.dp)
                         .height(130.dp)
                 )
                 Text(
                     text = "모범사례 이미지",
                     style = Bold12TextStyle,
                     color = Color.Black,
-                    modifier = Modifier.padding(10.dp)
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .clearAndSetSemantics {}
                 )
             }
-
-            Spacer(modifier = Modifier.width(10.dp))
-
             // 가게 이미지 업로드
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     modifier = Modifier
-                        .width(145.dp)
+                        .width(150.dp)
                         .height(130.dp)
                         .background(Gray1, RoundedCornerShape(10.dp))
                         .clip(RoundedCornerShape(10.dp))
@@ -425,7 +576,7 @@ fun AccessibilityUpload(
                             painter = rememberAsyncImagePainter(selectedImageUri),
                             contentDescription = "$title 가게 이미지",
                             modifier = Modifier
-                                .width(145.dp)
+                                .width(150.dp)
                                 .height(130.dp)
                                 .clickable {
                                     onImageClick()
@@ -444,7 +595,7 @@ fun AccessibilityUpload(
                             painter = painter,
                             contentDescription = "$title 가게 이미지",
                             modifier = Modifier
-                                .width(145.dp)
+                                .width(150.dp)
                                 .height(130.dp)
                                 .clickable {
                                     onImageClick()
@@ -453,7 +604,7 @@ fun AccessibilityUpload(
                     } else {
                         // 업로드된 이미지가 없는 경우
                         Text(
-                            text = "사진 첨부하기",
+                            text = "사진첨부하기",
                             style = Medium15TextStyle,
                             color = Color.Black,
                             modifier = Modifier.padding(10.dp)
@@ -464,17 +615,19 @@ fun AccessibilityUpload(
                     text = "우리가게 이미지",
                     style = Bold12TextStyle,
                     color = Color.Black,
-                    modifier = Modifier.padding(10.dp)
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .clearAndSetSemantics {}
                 )
             }
         }
 
-        var text by remember { mutableStateOf(description) }
+        var text by remember { mutableStateOf(description ?: "") }
         var isFocused by remember { mutableStateOf(false) }
 
         Box(
             modifier = Modifier
-                .width(300.dp)
+                .fillMaxWidth()
                 .background(Gray1, RoundedCornerShape(10.dp))
                 .padding(10.dp)
                 .clickable { isFocused = true }
@@ -502,7 +655,6 @@ fun AccessibilityUpload(
                 }
             )
         }
-        Spacer(modifier = Modifier.height(5.dp))
     }
 }
 
@@ -529,11 +681,9 @@ fun RankingList(
         contentAlignment = Alignment.CenterStart
     ) {
         Row(
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.width(40.dp))
-
             val painter = rememberAsyncImagePainter(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
@@ -543,7 +693,7 @@ fun RankingList(
             )
             Image(
                 painter = painter,
-                contentDescription = "$storeName 대표 이미지",
+                contentDescription = null,
                 modifier = Modifier
                     .width(100.dp)
                     .height(100.dp)
@@ -587,7 +737,7 @@ fun RankingListCheck(type: String, status: Boolean) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Image(
             painter = painterResource(id = imageResource),
-            contentDescription = contentDescriptionText,
+            contentDescription = "$contentDescriptionText",
             modifier = Modifier.size(18.dp)
         )
 
@@ -596,7 +746,8 @@ fun RankingListCheck(type: String, status: Boolean) {
         Text(
             text = type,
             style = Bold12TextStyle,
-            color = textColor
+            color = textColor,
+            modifier = Modifier.clearAndSetSemantics {}
         )
     }
 }
@@ -612,23 +763,24 @@ fun CheckSize1(type: String, status: Boolean, score: Int) {
         Pair(R.drawable.check_x, "$type 필수 항목 미충족")
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier.semantics { contentDescription = "$contentDescriptionText" }
+    ) {
         Image(
             painter = painterResource(id = imageResource),
-            contentDescription = contentDescriptionText,
+            contentDescription = null,
             modifier = Modifier.size(28.dp)
         )
-
         Spacer(modifier = Modifier.width(10.dp))
-
         Text(
             text = type,
             style = Medium20TextStyle,
-            color = Color.Black
+            color = Color.Black,
+            modifier = Modifier.clearAndSetSemantics {}
         )
-
-        Spacer(modifier = Modifier.width(30.dp))
-
+        Spacer(modifier = Modifier.width(10.dp))
         // "충족" 상태일 때만 점수 표시
         if (isFulfilled) {
             Text(
@@ -652,27 +804,29 @@ fun CheckSize2(type: String, status: Boolean) {
     }
 
     Row(
-        modifier = Modifier.width(300.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = "$contentDescriptionText" },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Spacer(modifier = Modifier.width(15.dp))
-
-        Text(
-            modifier = Modifier.width(250.dp),
-            text = type,
-            style = Regular15TextStyle,
-            color = Color.Black
-        )
-
-        Spacer(modifier = Modifier.width(5.dp))
-
-        Image(
-            painter = painterResource(id = imageResource),
-            contentDescription = contentDescriptionText,
-            modifier = Modifier.size(15.dp)
-        )
-
-        Spacer(modifier = Modifier.width(15.dp))
+        Row {
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = type,
+                style = Regular15TextStyle,
+                color = Color.Black,
+                modifier = Modifier.clearAndSetSemantics {}
+            )
+        }
+        Row {
+            Image(
+                painter = painterResource(id = imageResource),
+                contentDescription = null,
+                modifier = Modifier.size(15.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+        }
     }
 }
 
@@ -688,24 +842,24 @@ fun CheckSize3Bold(type: String, status: Boolean) {
     }
 
     Row(
-        modifier = Modifier.width(300.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = "$contentDescriptionText" },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
         Spacer(modifier = Modifier.width(15.dp))
-
         Image(
             painter = painterResource(id = imageResource),
-            contentDescription = contentDescriptionText,
+            contentDescription = null,
             modifier = Modifier.size(20.dp)
         )
-
         Spacer(modifier = Modifier.width(15.dp))
-
         Text(
-            modifier = Modifier.width(250.dp),
             text = type,
             style = Bold15TextStyle,
-            color = Color.Black
+            color = Color.Black,
+            modifier = Modifier.clearAndSetSemantics {}
         )
     }
 }
@@ -722,21 +876,26 @@ fun CheckSize3Light(type: String, status: Boolean) {
     }
 
     Row(
-        modifier = Modifier.width(300.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = "$contentDescriptionText" },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
         Spacer(modifier = Modifier.width(15.dp))
 
         Image(
             painter = painterResource(id = imageResource),
-            contentDescription = contentDescriptionText,
+            contentDescription = null,
             modifier = Modifier.size(20.dp)
         )
 
         Spacer(modifier = Modifier.width(15.dp))
 
         Text(
-            modifier = Modifier.width(250.dp),
+            modifier = Modifier
+                .width(250.dp)
+                .clearAndSetSemantics {},
             text = type,
             style = Medium15TextStyle,
             color = Color.Black
@@ -751,15 +910,16 @@ fun Leave(navController: NavHostController, name: String, title: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(90.dp)
+            .height(100.dp)
             .background(Color.White),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
         Box(
             modifier = Modifier
-                .width(90.dp)
-                .height(90.dp)
+                .width(70.dp)
+                .height(70.dp)
+                .semantics { contentDescription = "$name 페이지 나가기" }
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },  // 상호작용 상태
                     indication = null  // 리플 효과 제거
@@ -771,23 +931,20 @@ fun Leave(navController: NavHostController, name: String, title: Boolean) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.leave),
-                contentDescription = "$name 페이지 나가기",
+                contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )
         }
-
         if (title) {
             Text(
-                modifier = Modifier.weight(1f),
                 text = name,
                 style = Bold20TextStyle,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.clearAndSetSemantics {}
             )
-            Spacer(modifier = Modifier.width(90.dp))
         }
     }
 }
-
 
 @Preview(showSystemUi = true)
 @Composable
