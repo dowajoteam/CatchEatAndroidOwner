@@ -20,7 +20,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import catcheat.android.owner.R
-import catcheat.android.owner.ui.theme.Bold30TextStyle
+import catcheat.android.owner.ui.theme.Bold25TextStyle
 import catcheat.android.owner.ui.theme.CatchEat
 import catcheat.android.owner.ui.theme.Regular15TextStyle
 
@@ -29,13 +29,14 @@ fun OnBoarding2Screen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(Color.White)
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Row {
-            Text(text = "모두에게 닿기위한", style = Bold30TextStyle, color = CatchEat, modifier = Modifier.clearAndSetSemantics {})
-            Text(text = " 가게의 시작", style = Bold30TextStyle, color = Color.Black, modifier = Modifier.clearAndSetSemantics {})
+            Text(text = "모두에게 닿기위한", style = Bold25TextStyle, color = CatchEat, modifier = Modifier.clearAndSetSemantics {})
+            Text(text = " 가게의 시작", style = Bold25TextStyle, color = Color.Black, modifier = Modifier.clearAndSetSemantics {})
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text(text = "접근성 점수 높이고 무료 홍보 받자!", style = Regular15TextStyle, color = Color.Gray, modifier = Modifier.clearAndSetSemantics {})

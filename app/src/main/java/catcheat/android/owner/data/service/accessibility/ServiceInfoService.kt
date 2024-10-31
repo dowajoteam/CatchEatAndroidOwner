@@ -10,5 +10,5 @@ interface ServiceInfoService {
     @GET("/api/store/service/accessibility/")
     suspend fun getServiceInfo(
         @Header("Authorization") token: String
-    ): Response<ServiceInfoResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<ServiceInfoResponse>
 }

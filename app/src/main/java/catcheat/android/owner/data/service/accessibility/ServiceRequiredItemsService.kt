@@ -10,5 +10,5 @@ interface ServiceRequiredItemsService {
     @GET("/api/store/service/requirements-status/")
     suspend fun getServiceRequiredItems(
         @Header("Authorization") token: String
-    ): Response<ServiceRequiredItemsResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<ServiceRequiredItemsResponse>
 }

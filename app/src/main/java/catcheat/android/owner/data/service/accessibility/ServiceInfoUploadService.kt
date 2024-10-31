@@ -17,5 +17,5 @@ interface ServiceInfoUploadService {
         @Header("Authorization") token: String,
         @Part("staff_call_order_available_description") staffCallOrderAvailableDescription: RequestBody?,
         @Part staffCallOrderAvailableImage: MultipartBody.Part?
-    ): Response<ServiceInfoResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<ServiceInfoResponse>
 }

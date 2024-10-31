@@ -10,5 +10,5 @@ interface PhysicalRequiredItemsService {
     @GET("/api/store/physical/requirements-status/")
     suspend fun getPhysicalRequiredItems(
         @Header("Authorization") token: String
-    ): Response<PhysicalRequiredItemsResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<PhysicalRequiredItemsResponse>
 }

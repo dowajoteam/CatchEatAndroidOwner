@@ -21,5 +21,5 @@ interface VisualInfoUploadService {
         @Part selfServiceAvailableImage: MultipartBody.Part?,
         @Part("central_table_setup_description") centralTableSetupDescription: RequestBody?,
         @Part centralTableSetupImage: MultipartBody.Part?
-    ): Response<VisualInfoResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<VisualInfoResponse>
 }

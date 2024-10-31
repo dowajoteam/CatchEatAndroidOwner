@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,10 +35,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import catcheat.android.owner.R
-import catcheat.android.owner.ui.common.CheckSize1
 import catcheat.android.owner.ui.common.CheckSize2
+import catcheat.android.owner.ui.common.CheckSize1
 import catcheat.android.owner.ui.common.Leave
-import catcheat.android.owner.ui.common.RestaurantInformation2
+import catcheat.android.owner.ui.common.RestaurantInfo
 import catcheat.android.owner.ui.ranking.viewmodel.RankingDetailsViewModel
 import catcheat.android.owner.ui.theme.LightCatchEat
 import catcheat.android.owner.ui.theme.Medium15TextStyle
@@ -72,7 +71,7 @@ fun RankingDetailsScreen(navController: NavHostController, storeId: Int, viewMod
                 horizontalAlignment = Alignment.Start
             ) {
                 item {
-                    RestaurantInformation2(details.image, details.storeName, details.address)
+                    RestaurantInfo(details.image, details.storeName, details.address)
                     Spacer(modifier = Modifier.height(30.dp))
                 }
                 item {

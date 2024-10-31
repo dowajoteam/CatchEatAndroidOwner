@@ -34,7 +34,7 @@ import catcheat.android.owner.R
 import catcheat.android.owner.ui.common.AccessibilityScreens
 import catcheat.android.owner.ui.common.AccessibilityUploadList
 import catcheat.android.owner.ui.common.CustomerInfoBox
-import catcheat.android.owner.ui.common.RestaurantInformation1
+import catcheat.android.owner.ui.common.HomeRestaurantInfo
 import catcheat.android.owner.ui.main.viewmodel.HomeViewModel
 import catcheat.android.owner.ui.theme.BannerPoint
 import catcheat.android.owner.ui.theme.Bold20TextStyle
@@ -49,6 +49,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = hilt
     val context = LocalContext.current
 
     val storeInfo by viewModel.storeInfo.observeAsState(null)
+    val potentialCustomers by viewModel.potentialCustomers.observeAsState(null)
     val isRequestInProgress by viewModel.isRequestInProgress.observeAsState(false)
     val isImageUpdateInProgress by viewModel.isImageUpdateInProgress.observeAsState(false)
 
@@ -69,14 +70,8 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = hilt
         }
     )
 
-//    // 첫 화면 로드시 데이터 로드
-//    LaunchedEffect(Unit) {
-//        if (storeInfo == null && !isRequestInProgress) {
-//            viewModel.refresh()
-//        }
-//    }
     LaunchedEffect(key1 = Unit) {
-        if (storeInfo == null && !isRequestInProgress) {
+        if (storeInfo == null && potentialCustomers == null && !isRequestInProgress) {
             viewModel.refresh()
         }
     }
@@ -86,48 +81,47 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = hilt
             .fillMaxSize()
             .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.Top
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(110.dp),
-            contentAlignment = Alignment.Center
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.banner),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start,
-            ) {
-                Text(
-                    text = "가게 홍보 기회 잡자 !",
-                    style = Medium20TextStyle,
-                    color = BannerPoint
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "접근성 카테고리별 기본 항목 충족 시\n캐칫 이용자에게 가게홍보가 진행됩니다.\n만족하는 카테고리를 늘리면 상위에 노출될 수 있어요.",
-                    style = Medium15TextStyle,
-                    color = Color.Black
-                )
-            }
-        }
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.banner),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.Start,
+                    ) {
+                        Text(
+                            text = "가게 홍보 기회 잡자 !",
+                            style = Medium20TextStyle,
+                            color = BannerPoint
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = "접근성 카테고리별 기본 항목 충족 시\n캐칫 이용자에게 가게홍보가 진행됩니다.\n만족하는 카테고리를 늘리면 상위에 노출될 수 있어요.",
+                            style = Medium15TextStyle,
+                            color = Color.Black
+                        )
+                    }
+                }
 
-//        LazyColumn(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(top = 30.dp, bottom = 70.dp, start = 30.dp, end = 30.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            item {
+                Spacer(modifier = Modifier.height(20.dp))
+
                 storeInfo?.let { info ->
-                    RestaurantInformation1(
+                    HomeRestaurantInfo(
                         name = info.storeName,
                         address = info.address,
                         overallRank = info.overallRank,
@@ -139,45 +133,47 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = hilt
                             }
                         }
                     )
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    Text(
-                        text = "우리가게 접근성 점수 올리러 가기",
-                        style = Bold20TextStyle,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    LazyRow {
-                        item {
-                            CustomerInfoBox(info.storeName, 9000)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(30.dp))
-
-                    LazyColumn {
-                        item {
-                            AccessibilityUploadList(0, info.physicalAccessibility, info.physicalScore) {
-                                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/0")
-                            }
-                        }
-                        item {
-                            AccessibilityUploadList(1, info.serviceAccessibility, info.serviceScore) {
-                                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/1")
-                            }
-                        }
-                        item {
-                            AccessibilityUploadList(2, info.visualImpairmentAccessibility, info.visualScore) {
-                                navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/2")
-                            }
-                        }
+            item {
+                storeInfo?.let { info ->
+                    potentialCustomers?.let { customers ->
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = "우리가게 접근성 점수 올리러 가기",
+                            style = Bold20TextStyle,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        CustomerInfoBox(info.storeName, customers.totalPotentialCustomers)
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
-//            }
-//        }
+            }
+
+            item {
+                storeInfo?.let { info ->
+                    AccessibilityUploadList(0, info.physicalAccessibility, info.physicalScore) {
+                        navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/0")
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    AccessibilityUploadList(1, info.serviceAccessibility, info.serviceScore) {
+                        navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/1")
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    AccessibilityUploadList(2, info.visualImpairmentAccessibility, info.visualScore) {
+                        navController.navigate("${AccessibilityScreens.AccessibilityUpload.name}/2")
+                    }
+
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
+            }
+        }
     }
 }

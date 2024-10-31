@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -210,6 +211,7 @@ fun SignUpScreen(
                             Image(
                                 painter = rememberAsyncImagePainter(imageUri),
                                 contentDescription = "선택된 이미지",
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(100.dp)
                                     .clickable(

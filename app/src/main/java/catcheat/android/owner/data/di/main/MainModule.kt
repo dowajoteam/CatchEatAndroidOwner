@@ -1,11 +1,16 @@
 package catcheat.android.owner.data.di.main
 
+import catcheat.android.owner.data.repository.main.PotentialCustomersRepository
+import catcheat.android.owner.data.repository.main.PotentialCustomersRepositoryImpl
 import catcheat.android.owner.data.repository.main.StoreImageUpdateRepository
 import catcheat.android.owner.data.repository.main.StoreImageUpdateRepositoryImpl
 import catcheat.android.owner.data.repository.main.StoreInfoRepository
 import catcheat.android.owner.data.repository.main.StoreInfoRepositoryImpl
+import catcheat.android.owner.data.service.main.PotentialCustomersService
 import catcheat.android.owner.data.service.main.StoreImageUpdateService
 import catcheat.android.owner.data.service.main.StoreInfoService
+import catcheat.android.owner.data.source.main.PotentialCustomersRemoteDataSource
+import catcheat.android.owner.data.source.main.PotentialCustomersRemoteDataSourceImpl
 import catcheat.android.owner.data.source.main.StoreImageUpdateRemoteDataSource
 import catcheat.android.owner.data.source.main.StoreImageUpdateRemoteDataSourceImpl
 import catcheat.android.owner.data.source.main.StoreInfoRemoteDataSource
@@ -35,6 +40,13 @@ object MainModule {
         return retrofit.create(StoreInfoService::class.java)
     }
 
+    // PotentialCustomersService 제공
+    @Provides
+    @Singleton
+    fun providePotentialCustomersService(retrofit: Retrofit): PotentialCustomersService {
+        return retrofit.create(PotentialCustomersService::class.java)
+    }
+
     // StoreImageUpdateRemoteDataSource 제공
     @Provides
     @Singleton
@@ -53,6 +65,15 @@ object MainModule {
         return StoreInfoRemoteDataSourceImpl(service)
     }
 
+    // PotentialCustomersRemoteDataSource 제공
+    @Provides
+    @Singleton
+    fun providePotentialCustomersRemoteDataSource(
+        service: PotentialCustomersService
+    ): PotentialCustomersRemoteDataSource {
+        return PotentialCustomersRemoteDataSourceImpl(service)
+    }
+
     // StoreImageUpdateRepository 제공
     @Provides
     @Singleton
@@ -69,5 +90,14 @@ object MainModule {
         remoteDataSource: StoreInfoRemoteDataSource
     ): StoreInfoRepository {
         return StoreInfoRepositoryImpl(remoteDataSource)
+    }
+
+    // PotentialCustomersRepository 제공
+    @Provides
+    @Singleton
+    fun providePotentialCustomersRepository(
+        remoteDataSource: PotentialCustomersRemoteDataSource
+    ): PotentialCustomersRepository {
+        return PotentialCustomersRepositoryImpl(remoteDataSource)
     }
 }

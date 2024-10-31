@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ fun SignUpCompletedScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .padding(20.dp)
             .semantics { contentDescription = "입점 신청 완료! 캐칫 가게 승인 절차 완료 후, 등록해주신 번호로 입점 확인 안내 문자가 전송될 예정입니다." },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

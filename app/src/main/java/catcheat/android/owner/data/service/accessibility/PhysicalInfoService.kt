@@ -10,5 +10,5 @@ interface PhysicalInfoService {
     @GET("/api/store/physical/accessibility/")
     suspend fun getPhysicalInfo(
         @Header("Authorization") token: String
-    ): Response<PhysicalInfoResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<PhysicalInfoResponse>
 }

@@ -235,7 +235,7 @@ fun AddressTextField(
         if (showWebView.value) {
             WebViewAddress(onAddressSelected = { selectedAddress ->
                 onValueChange(selectedAddress)
-                showWebView.value = false // WebView 닫기
+                showWebView.value = false
             })
         }
     }
@@ -252,8 +252,8 @@ fun WebViewAddress(
             WebView(context).apply {
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
-                settings.loadWithOverviewMode = true // 화면 크기에 맞게 조정
-                settings.useWideViewPort = true // 콘텐츠가 화면 가로 크기에 맞게 로드됨
+                settings.loadWithOverviewMode = true
+                settings.useWideViewPort = true
                 webViewClient = WebViewClient()
                 webChromeClient = WebChromeClient()
 
@@ -277,7 +277,7 @@ fun CustomButton(
 ) {
     Box(
         modifier = Modifier
-            .width(350.dp)
+            .fillMaxWidth()
             .height(50.dp)
             .background(
                 color = if (enabled) CatchEat else Color.Gray, // enabled 상태에 따라 색상 변경
@@ -340,7 +340,7 @@ fun TOSCheck(text1: String, text2: String, status: Boolean, onStatusChange: (Boo
 }
 
 @Composable
-fun RestaurantInformation1(
+fun HomeRestaurantInfo(
     name: String,
     address: String,
     overallRank: String,
@@ -353,7 +353,8 @@ fun RestaurantInformation1(
     }
     Row(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(start = 30.dp, end = 30.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -392,7 +393,7 @@ fun RestaurantInformation1(
 }
 
 @Composable
-fun RestaurantInformation2(imageUrl: String?, name: String, address: String) {
+fun RestaurantInfo(imageUrl: String?, name: String, address: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -429,7 +430,7 @@ fun RestaurantInformation2(imageUrl: String?, name: String, address: String) {
 }
 
 @Composable
-fun CustomerInfoBox(name: String, missedCustomers: Int) {
+fun CustomerInfoBox(name: String, Customers: Int) {
     Box(
         modifier = Modifier
             .width(300.dp)
@@ -438,7 +439,7 @@ fun CustomerInfoBox(name: String, missedCustomers: Int) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "현재 $name 사장님이\n놓치고 있는 고객은 $missedCustomers"+"명이에요.",
+            text = "현재 $name 사장님이\n놓치고 있는 고객은 $Customers"+"명이에요.",
             style = Regular15TextStyle,
             color = Color.White
         )
@@ -479,7 +480,7 @@ fun AccessibilityUploadList(type: Int, status: Boolean, score: Int, onClick: () 
                 Image(
                     painter = painterResource(id = it),
                     contentDescription = null,
-                    modifier = Modifier.size(70.dp)
+                    modifier = Modifier.size(60.dp)
                 )
             }
             Spacer(modifier = Modifier.width(20.dp))
@@ -519,7 +520,7 @@ fun AccessibilityUploadList(type: Int, status: Boolean, score: Int, onClick: () 
 
 
 @Composable
-fun AccessibilityUpload(
+fun PhysicalUpload(
     title: String,
     status: Boolean,
     image: Painter,
@@ -539,14 +540,18 @@ fun AccessibilityUpload(
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        Row(horizontalArrangement = Arrangement.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row {
+            Column(
+                modifier = Modifier.fillMaxWidth(0.5f),
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     painter = image,
                     contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .width(150.dp)
+                        .fillMaxWidth()
                         .height(130.dp)
+                        .clip(RoundedCornerShape(10.dp))
                 )
                 Text(
                     text = "모범사례 이미지",
@@ -558,15 +563,17 @@ fun AccessibilityUpload(
                 )
             }
             // 가게 이미지 업로드
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     modifier = Modifier
-                        .width(150.dp)
+                        .fillMaxWidth()
                         .height(130.dp)
                         .background(Gray1, RoundedCornerShape(10.dp))
                         .clip(RoundedCornerShape(10.dp))
                         .clickable {
-                            onImageClick
+                            onImageClick()
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -575,9 +582,9 @@ fun AccessibilityUpload(
                         Image(
                             painter = rememberAsyncImagePainter(selectedImageUri),
                             contentDescription = "$title 가게 이미지",
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .width(150.dp)
-                                .height(130.dp)
+                                .fillMaxSize()
                                 .clickable {
                                     onImageClick()
                                 }
@@ -594,9 +601,9 @@ fun AccessibilityUpload(
                         Image(
                             painter = painter,
                             contentDescription = "$title 가게 이미지",
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .width(150.dp)
-                                .height(130.dp)
+                                .fillMaxSize()
                                 .clickable {
                                     onImageClick()
                                 }
@@ -604,10 +611,9 @@ fun AccessibilityUpload(
                     } else {
                         // 업로드된 이미지가 없는 경우
                         Text(
-                            text = "사진첨부하기",
+                            text = "사진 첨부하기 (선택)",
                             style = Medium15TextStyle,
-                            color = Color.Black,
-                            modifier = Modifier.padding(10.dp)
+                            color = Color.Black
                         )
                     }
                 }
@@ -621,6 +627,115 @@ fun AccessibilityUpload(
                 )
             }
         }
+
+        var text by remember { mutableStateOf(description ?: "") }
+        var isFocused by remember { mutableStateOf(false) }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Gray1, RoundedCornerShape(10.dp))
+                .padding(10.dp)
+                .clickable { isFocused = true }
+        ) {
+            BasicTextField(
+                value = text,
+                onValueChange = { newText ->
+                    text = newText
+                    onDescriptionChange(newText) // 설명이 변경되면 ViewModel로 전달
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                textStyle = Regular15TextStyle.copy(color = Color.Black),
+                singleLine = false,
+                decorationBox = { innerTextField ->
+                    if (text.isEmpty() && !isFocused) {
+                        Text(
+                            text = "설명하고 싶은 부분을 자유롭게 작성해주세요.",
+                            style = Regular15TextStyle,
+                            color = Color.Gray
+                        )
+                    }
+                    innerTextField()
+                }
+            )
+        }
+    }
+}
+@Composable
+fun ServiceVisualUpload(
+    title: String,
+    status: Boolean,
+    imageUrl: String?,
+    description: String?,
+    selectedImageUri: Uri?,
+    onImageClick: () -> Unit,
+    onDescriptionChange: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp, bottom = 20.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        CheckSize3Light(title, status)
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(130.dp)
+                .background(Gray1, RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(10.dp))
+                .clickable {
+                    onImageClick()
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            if (selectedImageUri != null) {
+                // 이미지 선택 여부에 따라 미리보기를 표시
+                Image(
+                    painter = rememberAsyncImagePainter(selectedImageUri),
+                    contentDescription = "$title 가게 이미지",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            onImageClick()
+                        }
+                )
+            } else if (imageUrl != null) {
+                // 업로드된 이미지가 있는 경우
+                val painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrl)
+                        .memoryCachePolicy(CachePolicy.DISABLED)  // 메모리 캐시 비활성화
+                        .diskCachePolicy(CachePolicy.DISABLED)    // 디스크 캐시 비활성화
+                        .build()
+                )
+                Image(
+                    painter = painter,
+                    contentDescription = "$title 가게 이미지",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            onImageClick()
+                        }
+                )
+            } else {
+                // 업로드된 이미지가 없는 경우
+                Text(
+                    text = "사진 첨부하기 (선택)",
+                    style = Medium15TextStyle,
+                    color = Color.Black
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
 
         var text by remember { mutableStateOf(description ?: "") }
         var isFocused by remember { mutableStateOf(false) }
@@ -694,6 +809,7 @@ fun RankingList(
             Image(
                 painter = painter,
                 contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .width(100.dp)
                     .height(100.dp)

@@ -27,10 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import catcheat.android.owner.R
 import catcheat.android.owner.ui.accessibility.viewmodel.PhysicalRequiredItemsViewModel
-import catcheat.android.owner.ui.common.AccessibilityUpload
 import catcheat.android.owner.ui.common.CheckSize2
 import catcheat.android.owner.ui.common.CheckSize3Bold
 import catcheat.android.owner.ui.common.CustomButton
+import catcheat.android.owner.ui.common.PhysicalUpload
 import catcheat.android.owner.ui.theme.Gray2
 
 @Composable
@@ -112,7 +112,7 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                             doorWidthOver90cmImage = uri // 선택된 이미지를 저장
                         }
                     )
-                    AccessibilityUpload(
+                    PhysicalUpload(
                         "출입문 간격 90cm 이상",
                         items.doorWidthOver90cm,
                         painterResource(id = R.drawable.ex_physical1),
@@ -130,10 +130,10 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                             rampOrNoThresholdImage = uri // 선택된 이미지를 저장
                         }
                     )
-                    AccessibilityUpload(
+                    PhysicalUpload(
                         "입구 경사로 또는 문턱 제거",
                         items.rampOrNoThreshold,
-                        painterResource(id = R.drawable.ex_physical1),
+                        painterResource(id = R.drawable.ex_physical2),
                         info.rampOrNoThresholdImage,
                         info.rampOrNoThresholdDescription,
                         selectedImageUri = rampOrNoThresholdImage,
@@ -148,10 +148,10 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                             automaticDoorOrHandleImage = uri // 선택된 이미지를 저장
                         }
                     )
-                    AccessibilityUpload(
+                    PhysicalUpload(
                         "자동문 또는 손잡이가 있는 문",
                         items.automaticDoorOrHandle,
-                        painterResource(id = R.drawable.ex_physical1),
+                        painterResource(id = R.drawable.ex_physical3),
                         info.automaticDoorOrHandleImage,
                         info.automaticDoorOrHandleDescription,
                         selectedImageUri = automaticDoorOrHandleImage,
@@ -166,10 +166,10 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                             wheelchairSpaceImage = uri // 선택된 이미지를 저장
                         }
                     )
-                    AccessibilityUpload(
+                    PhysicalUpload(
                         "가게 내에 휠체어 전용 공간 확보",
                         items.wheelchairSpace,
-                        painterResource(id = R.drawable.ex_physical2),
+                        painterResource(id = R.drawable.ex_physical4),
                         info.wheelchairSpaceImage,
                         info.wheelchairSpaceDescription,
                         selectedImageUri = wheelchairSpaceImage,
@@ -184,10 +184,10 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                             wheelchairParkingSpaceImage = uri // 선택된 이미지를 저장
                         }
                     )
-                    AccessibilityUpload(
+                    PhysicalUpload(
                         "휠체어 내릴 수 있는 주차장 공간 확보",
                         items.wheelchairParkingSpace,
-                        painterResource(id = R.drawable.ex_physical3),
+                        painterResource(id = R.drawable.ex_physical5),
                         info.wheelchairParkingSpaceImage,
                         info.wheelchairParkingSpaceDescription,
                         selectedImageUri = wheelchairParkingSpaceImage,
@@ -202,10 +202,10 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                             disabledToiletImage = uri // 선택된 이미지를 저장
                         }
                     )
-                    AccessibilityUpload(
+                    PhysicalUpload(
                         "장애인 전용 화장실",
                         items.disabledToilet,
-                        painterResource(id = R.drawable.ex_physical4),
+                        painterResource(id = R.drawable.ex_physical6),
                         info.disabledToiletImage,
                         info.disabledToiletDescription,
                         selectedImageUri = disabledToiletImage,
@@ -240,7 +240,7 @@ fun PhysicalRequiredItems(viewModel: PhysicalRequiredItemsViewModel = hiltViewMo
                         if (success) {
                             Text(text = "업로드 성공!", color = Color.Green)
                         } else {
-                            Text(text = "업로드 실패!", color = Color.Red)
+                            Text(text = "업로드 실패", color = Color.Red)
                         }
                     }
                 }

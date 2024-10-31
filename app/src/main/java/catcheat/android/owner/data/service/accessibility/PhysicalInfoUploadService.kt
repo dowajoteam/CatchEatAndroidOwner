@@ -27,5 +27,5 @@ interface PhysicalInfoUploadService {
         @Part wheelchairParkingSpaceImage: MultipartBody.Part?,
         @Part("disabled_toilet_description") disabledToiletDescription: RequestBody?,
         @Part disabledToiletImage: MultipartBody.Part?
-    ): Response<PhysicalInfoResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<PhysicalInfoResponse>
 }

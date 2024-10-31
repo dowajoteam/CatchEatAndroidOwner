@@ -10,5 +10,5 @@ interface VisualInfoService {
     @GET("/api/store/visual/accessibility/")
     suspend fun getVisualInfo(
         @Header("Authorization") token: String
-    ): Response<VisualInfoResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<VisualInfoResponse>
 }

@@ -10,5 +10,5 @@ interface VisualRequiredItemsService {
     @GET("/api/store/visual/requirements-status/")
     suspend fun getVisualRequiredItems(
         @Header("Authorization") token: String
-    ): Response<VisualRequiredItemsResponse> // BaseApiResponse 대신 Response<T> 사용
+    ): Response<VisualRequiredItemsResponse>
 }

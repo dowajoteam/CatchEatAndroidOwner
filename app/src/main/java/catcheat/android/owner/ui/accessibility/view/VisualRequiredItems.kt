@@ -4,11 +4,9 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -20,19 +18,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import catcheat.android.owner.R
 import catcheat.android.owner.ui.accessibility.viewmodel.VisualRequiredItemsViewModel
-import catcheat.android.owner.ui.common.AccessibilityUpload
 import catcheat.android.owner.ui.common.CheckSize2
 import catcheat.android.owner.ui.common.CheckSize3Bold
 import catcheat.android.owner.ui.common.CustomButton
+import catcheat.android.owner.ui.common.ServiceVisualUpload
 import catcheat.android.owner.ui.theme.Gray2
 
 @Composable
@@ -100,10 +95,9 @@ fun VisualRequiredItems(viewModel: VisualRequiredItemsViewModel = hiltViewModel(
                     guideDogAllowedImage = uri // 선택된 이미지를 저장
                 }
             )
-            AccessibilityUpload(
+            ServiceVisualUpload(
                 title = "안내견 출입",
                 status = visualRequiredItems?.guideDogAllowed ?: false,
-                image = painterResource(id = R.drawable.ex_visual1),
                 imageUrl = null,
                 description = guideDogAllowedDescription,
                 selectedImageUri = guideDogAllowedImage,
@@ -119,10 +113,9 @@ fun VisualRequiredItems(viewModel: VisualRequiredItemsViewModel = hiltViewModel(
                     selfServiceAvailableImage = uri // 선택된 이미지를 저장
                 }
             )
-            AccessibilityUpload(
+            ServiceVisualUpload(
                 title = "셀프 서비스 제공",
                 status = visualRequiredItems?.selfServiceAvailable ?: false,
-                image = painterResource(id = R.drawable.ex_visual2),
                 imageUrl = null,
                 description = selfServiceAvailableDescription,
                 selectedImageUri = selfServiceAvailableImage,
@@ -138,10 +131,9 @@ fun VisualRequiredItems(viewModel: VisualRequiredItemsViewModel = hiltViewModel(
                     centralTableSetupImage = uri // 선택된 이미지를 저장
                 }
             )
-            AccessibilityUpload(
+            ServiceVisualUpload(
                 title = "중앙에 몰아서 테이블 세팅",
                 status = visualRequiredItems?.centralTableSetup ?: false,
-                image = painterResource(id = R.drawable.ex_visual3),
                 imageUrl = null,
                 description = centralTableSetupDescription,
                 selectedImageUri = centralTableSetupImage,
